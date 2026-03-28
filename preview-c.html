@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ray — Captain's Journal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Source+Code+Pro:wght@300;400&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ─── Custom Properties ─────────────────────────────────────────── */
+    :root {
+      --bg:          #0d1117;
+      --surface:     #141c28;
+      --border:      #2a3a50;
+      --teal:        #4ecdc4;
+      --brass:       #c98a3e;
+      --brass-dim:   #8a5e28;
+      --text:        #dde4ea;
+      --muted:       #6b8399;
+      --font-serif:  'Playfair Display', Georgia, serif;
+      --font-mono:   'Source Code Pro', 'Courier New', monospace;
+      --reading-w:   680px;
+      --radius:      6px;
+    }
+
+    /* ─── Reset & Base ──────────────────────────────────────────────── */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      font-size: 16px;
+      scroll-behavior: smooth;
+    }
+
+    body {
+      background-color: var(--bg);
+      /* subtle diagonal stripe texture */
+      background-image: repeating-linear-gradient(
+        135deg,
+        transparent,
+        transparent 3px,
+        rgba(255, 255, 255, 0.012) 3px,
+        rgba(255, 255, 255, 0.012) 4px
+      );
+      color: var(--text);
+      font-family: var(--font-mono);
+      font-weight: 300;
+      font-size: 0.95rem;
+      line-height: 1.85;
+      min-height: 100vh;
+      padding: 0 1.5rem 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    /* ─── Main Layout ───────────────────────────────────────────────── */
+    .page-wrap {
+      width: 100%;
+      max-width: var(--reading-w);
+      padding-bottom: 6rem;
+    }
+
+    /* ─── Header ────────────────────────────────────────────────────── */
+    .site-header {
+      text-align: center;
+      padding: 5rem 0 3.5rem;
+    }
+
+    .compass-deco {
+      display: block;
+      font-size: 1.4rem;
+      color: var(--brass);
+      letter-spacing: 0.25em;
+      margin-bottom: 1.5rem;
+      opacity: 0.75;
+      user-select: none;
+    }
+
+    .site-name {
+      font-family: var(--font-serif);
+      font-weight: 500;
+      font-size: clamp(3rem, 8vw, 5rem);
+      color: var(--text);
+      letter-spacing: 0.02em;
+      line-height: 1.1;
+      margin-bottom: 0.6rem;
+    }
+
+    .tagline {
+      font-family: var(--font-mono);
+      font-weight: 300;
+      font-size: 0.8rem;
+      color: var(--muted);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      margin-bottom: 1.8rem;
+    }
+
+    .header-rule {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.6rem;
+      color: var(--brass);
+      font-size: 0.7rem;
+      letter-spacing: 0.08em;
+      opacity: 0.6;
+      user-select: none;
+    }
+
+    .header-rule::before,
+    .header-rule::after {
+      content: '';
+      display: block;
+      width: 72px;
+      height: 1px;
+      background: var(--brass);
+      opacity: 0.5;
+    }
+
+    /* ─── Divider ───────────────────────────────────────────────────── */
+    .divider {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      margin: 3rem 0;
+      color: var(--brass-dim);
+      font-size: 0.65rem;
+      letter-spacing: 0.2em;
+      user-select: none;
+      opacity: 0.55;
+    }
+
+    .divider span {
+      font-size: 0.9rem;
+      color: var(--brass);
+    }
+
+    /* ─── Section Label ─────────────────────────────────────────────── */
+    .section-label {
+      font-family: var(--font-serif);
+      font-weight: 400;
+      font-size: 0.72rem;
+      font-variant: small-caps;
+      letter-spacing: 0.18em;
+      text-transform: lowercase;
+      color: var(--brass);
+      margin-bottom: 1.6rem;
+      padding-bottom: 0.45rem;
+      border-bottom: 1px solid var(--brass-dim);
+      display: inline-block;
+      opacity: 0.9;
+    }
+
+    /* ─── About Section ─────────────────────────────────────────────── */
+    .about-section {
+      margin-bottom: 0;
+    }
+
+    .about-section p {
+      color: var(--text);
+      margin-bottom: 1.4rem;
+    }
+
+    .about-section p:last-of-type {
+      margin-bottom: 0;
+    }
+
+    .pull-quote {
+      font-family: var(--font-serif);
+      font-style: italic;
+      font-size: 1.05rem;
+      color: var(--teal);
+      line-height: 1.7;
+      padding: 1.2rem 1.6rem;
+      border-left: 2px solid var(--teal);
+      background: rgba(78, 205, 196, 0.04);
+      border-radius: 0 var(--radius) var(--radius) 0;
+      margin-top: 1.8rem;
+      opacity: 0.9;
+    }
+
+    /* ─── Find Me Section ───────────────────────────────────────────── */
+    .links-section {
+      margin-bottom: 0;
+    }
+
+    .links-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .links-list li {
+      display: flex;
+      align-items: baseline;
+      gap: 0.65rem;
+    }
+
+    .link-bullet {
+      color: var(--brass);
+      font-size: 0.65rem;
+      opacity: 0.7;
+      flex-shrink: 0;
+      position: relative;
+      top: -0.05em;
+    }
+
+    .links-list a {
+      color: var(--teal);
+      text-decoration: none;
+      font-weight: 300;
+      font-size: 0.9rem;
+      letter-spacing: 0.02em;
+      transition: color 0.2s ease, opacity 0.2s ease;
+      border-bottom: 1px solid transparent;
+    }
+
+    .links-list a:hover {
+      color: var(--text);
+      border-bottom-color: var(--teal);
+    }
+
+    .link-label {
+      color: var(--muted);
+      font-size: 0.78rem;
+      margin-left: 0.3rem;
+    }
+
+    /* ─── Footer ────────────────────────────────────────────────────── */
+    .site-footer {
+      position: relative;
+      text-align: center;
+      padding: 4rem 0 2rem;
+      margin-top: 3rem;
+      width: 100%;
+      max-width: var(--reading-w);
+    }
+
+    .footer-compass {
+      display: block;
+      font-size: 1rem;
+      color: var(--brass);
+      opacity: 0.4;
+      margin-bottom: 0.7rem;
+      letter-spacing: 0.2em;
+      user-select: none;
+    }
+
+    .footer-text {
+      font-family: var(--font-serif);
+      font-style: italic;
+      font-size: 0.8rem;
+      color: var(--muted);
+      letter-spacing: 0.06em;
+      opacity: 0.65;
+    }
+
+    /* ─── Animated Wave ─────────────────────────────────────────────── */
+    .wave-container {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 60px;
+      overflow: hidden;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .wave-svg {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 200%;
+      height: 100%;
+      opacity: 0.08;
+      animation: wave-drift 14s linear infinite;
+    }
+
+    @keyframes wave-drift {
+      0%   { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
+    }
+
+    /* ─── Card wrapper (optional surface) ──────────────────────────── */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 2rem 2.2rem;
+    }
+
+    /* ─── Responsive ────────────────────────────────────────────────── */
+    @media (max-width: 520px) {
+      body {
+        padding: 0 1rem;
+      }
+
+      .site-header {
+        padding: 3.5rem 0 2.5rem;
+      }
+
+      .card {
+        padding: 1.5rem 1.4rem;
+      }
+
+      .pull-quote {
+        padding: 1rem 1.2rem;
+        font-size: 0.98rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ── Wave (decorative, bottom of viewport) ───────────────────────── -->
+  <div class="wave-container" aria-hidden="true">
+    <svg class="wave-svg" viewBox="0 0 1440 60" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+      <path
+        d="M0,30 C180,55 360,5 540,30 C720,55 900,5 1080,30 C1260,55 1380,10 1440,30 L1440,60 L0,60 Z"
+        fill="#4ecdc4"
+      />
+    </svg>
+  </div>
+
+  <!-- ── Page Wrap ────────────────────────────────────────────────────── -->
+  <div class="page-wrap">
+
+    <!-- ── Header ──────────────────────────────────────────────────────── -->
+    <header class="site-header">
+      <span class="compass-deco" aria-hidden="true">✦ &nbsp; ✦ &nbsp; ✦</span>
+      <h1 class="site-name">Ray</h1>
+      <p class="tagline">Software Leader &nbsp;·&nbsp; Undersea Systems &nbsp;·&nbsp; 20+ Years in Defense</p>
+      <div class="header-rule" aria-hidden="true">✦</div>
+    </header>
+
+    <!-- ── Divider ──────────────────────────────────────────────────────── -->
+    <div class="divider" aria-hidden="true">
+      ── ── ── <span>✦</span> ── ── ──
+    </div>
+
+    <!-- ── About ───────────────────────────────────────────────────────── -->
+    <section class="about-section card" aria-labelledby="about-label">
+      <span class="section-label" id="about-label">About</span>
+
+      <p>
+        Twenty-odd years into a career building software for people who operate in places most never see,
+        I've had the good fortune to work on systems that genuinely matter. My focus has been defense — specifically
+        autonomous undersea vehicles, where software touches everything: mission planning, real-time autonomy,
+        sensor integration, and the quiet confidence a crew needs when something is operating beneath the surface
+        without them. I've been through the full lifecycle more times than I can count — design, development,
+        testing, field deployment — and I still find it interesting.
+      </p>
+
+      <p>
+        Outside of work, I spend time outdoors whenever I can and almost always have a book going. I've come
+        to believe that curiosity and kindness are genuinely the two most useful professional skills a person
+        can develop — more than any framework, language, or methodology. Curious people figure things out.
+        Kind people build teams worth being on.
+      </p>
+
+      <blockquote class="pull-quote">
+        "I've never regretted being kind to someone."
+      </blockquote>
+    </section>
+
+    <!-- ── Divider ──────────────────────────────────────────────────────── -->
+    <div class="divider" aria-hidden="true">
+      ── ── ── <span>✦</span> ── ── ──
+    </div>
+
+    <!-- ── Find Me ──────────────────────────────────────────────────────── -->
+    <section class="links-section card" aria-labelledby="findme-label">
+      <span class="section-label" id="findme-label">Find Me</span>
+
+      <ul class="links-list">
+        <li>
+          <span class="link-bullet" aria-hidden="true">✦</span>
+          <div>
+            <a href="https://github.com/rayzinhell" target="_blank" rel="noopener noreferrer">
+              github.com/rayzinhell
+            </a>
+            <span class="link-label">— code, projects, the occasional experiment</span>
+          </div>
+        </li>
+        <!-- Additional links can be added here -->
+      </ul>
+    </section>
+
+    <!-- ── Footer ───────────────────────────────────────────────────────── -->
+    <footer class="site-footer">
+      <span class="footer-compass" aria-hidden="true">✦</span>
+      <p class="footer-text">Still learning. Still exploring.</p>
+    </footer>
+
+  </div><!-- /page-wrap -->
+
+</body>
+</html>
