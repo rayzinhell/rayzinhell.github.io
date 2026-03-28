@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>RAY — Architect of the Ghost Fleet</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>☠</text></svg>">
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Pirata+One&family=IM+Fell+English:ital@0;1&display=swap" rel="stylesheet" />
@@ -483,6 +484,72 @@
       .aged-card { padding: 1.4rem 1.2rem; }
       .ship-ascii { font-size: 0.44rem; }
     }
+
+    /* ── DEPTH GAUGE ─────────────────────────────────── */
+    .depth-gauge {
+      position: fixed;
+      bottom: 6rem;
+      right: 1.2rem;
+      z-index: 10;
+      text-align: right;
+      font-family: 'Courier New', monospace;
+      line-height: 1.6;
+      opacity: 0.55;
+      transition: opacity 0.3s;
+      user-select: none;
+      pointer-events: none;
+    }
+    .depth-gauge:hover { opacity: 1; pointer-events: auto; }
+    .depth-gauge .dg-label {
+      font-size: 0.52rem;
+      letter-spacing: 0.35em;
+      color: var(--gold-dim);
+      text-transform: uppercase;
+    }
+    .depth-gauge .dg-reading {
+      font-size: 1.1rem;
+      letter-spacing: 0.08em;
+      color: var(--gold);
+      text-shadow: 0 0 10px rgba(212,160,23,0.5);
+    }
+    .depth-gauge .dg-unit {
+      font-size: 0.6rem;
+      color: var(--gold-dim);
+      margin-left: 0.1em;
+    }
+    .depth-gauge .dg-status {
+      font-size: 0.5rem;
+      letter-spacing: 0.2em;
+      color: var(--text);
+      opacity: 0.45;
+    }
+
+    /* ── SEA QUOTE ────────────────────────────────────── */
+    .sea-quote-wrap {
+      margin: 1.8rem 0 0;
+      text-align: center;
+      padding: 0 1rem;
+    }
+    .sea-quote-text {
+      display: block;
+      font-family: var(--font-body);
+      font-style: italic;
+      font-size: 0.9rem;
+      line-height: 1.7;
+      color: var(--text);
+      opacity: 0.55;
+      max-width: 480px;
+      margin: 0 auto;
+    }
+    .sea-quote-attr {
+      display: block;
+      margin-top: 0.5rem;
+      font-family: var(--font-head);
+      font-size: 0.65rem;
+      letter-spacing: 0.22em;
+      color: var(--gold-dim);
+      opacity: 0.7;
+    }
   </style>
 </head>
 <body>
@@ -513,6 +580,12 @@
         ^^^^^ ^^^^^^^^^^^^^^^^^^^^^
           ^^^^      ^^^^     ^^^    ^^
                ^^^^      ^^^</pre>
+  </div>
+
+  <!-- Sea quote -->
+  <div class="sea-quote-wrap">
+    <span class="sea-quote-text" id="sea-quote-text"></span>
+    <span class="sea-quote-attr" id="sea-quote-attr"></span>
   </div>
 
   <!-- ══════════════════════════════════════════════ -->
@@ -623,5 +696,71 @@
   <p class="footer-copy">☠ &nbsp; RAY &nbsp; ☠ &nbsp; All rights reserved &nbsp; ☠</p>
 </footer>
 
+<!-- Depth Gauge -->
+<div class="depth-gauge" aria-hidden="true">
+  <div class="dg-label">depth</div>
+  <div class="dg-reading"><span id="depth-val">0000</span><span class="dg-unit">fm</span></div>
+  <div class="dg-status" id="depth-status">descending</div>
+</div>
+
+<script>
+  // ── Sea quotes ──────────────────────────────────────────────
+  const QUOTES = [
+    { text: "The sea, once it casts its spell, holds one in its net of wonder forever.", attr: "Jacques Cousteau" },
+    { text: "A ship in harbor is safe, but that is not what ships are for.", attr: "John A. Shedd" },
+    { text: "The cure for anything is salt water — sweat, tears, or the sea.", attr: "Isak Dinesen" },
+    { text: "Not all those who wander are lost.", attr: "J.R.R. Tolkien" },
+    { text: "Twenty years from now you will be more disappointed by the things you didn't do than by the ones you did.", attr: "Mark Twain" },
+    { text: "We are tied to the ocean. And when we go back to the sea, we are going back from whence we came.", attr: "John F. Kennedy" },
+    { text: "The pessimist complains about the wind; the optimist expects it to change; the realist adjusts the sails.", attr: "William Arthur Ward" },
+    { text: "It is not the ship so much as the skillful sailing that assures the prosperous voyage.", attr: "George William Curtis" },
+    { text: "Difficulties are just things to overcome, after all.", attr: "Ernest Shackleton" },
+    { text: "The heart of man is very much like the sea; it has its storms, its tides, and its depths.", attr: "Vincent van Gogh" },
+    { text: "Even the darkest night will end and the sun will rise.", attr: "Victor Hugo" },
+    { text: "To reach a port we must set sail — sail, not tie at anchor; sail, not drift.", attr: "Franklin D. Roosevelt" },
+  ];
+
+  const q = QUOTES[Math.floor(Math.random() * QUOTES.length)];
+  document.getElementById('sea-quote-text').textContent = '\u201c' + q.text + '\u201d';
+  document.getElementById('sea-quote-attr').textContent = '\u2014 ' + q.attr;
+
+  // ── Depth gauge ─────────────────────────────────────────────
+  // Start at a plausible operating depth (200–500 fathoms)
+  let depth = 200 + Math.random() * 300;
+  const depthEl   = document.getElementById('depth-val');
+  const statusEl  = document.getElementById('depth-status');
+  const STATUSES  = ['descending', 'descending', 'descending', 'holding depth', 'adjusting trim'];
+  let statusIdx   = 0;
+  let tickCount   = 0;
+
+  function formatDepth(d) {
+    return String(Math.round(d)).padStart(4, '0');
+  }
+
+  function flickerOnce() {
+    depthEl.style.opacity = '0.2';
+    setTimeout(() => { depthEl.style.opacity = '1'; }, 90);
+  }
+
+  function tick() {
+    // Slow descent with tiny random pressure fluctuations
+    const drift = 0.15 + (Math.random() - 0.3) * 0.4;
+    depth = Math.max(10, depth + drift);
+    depthEl.textContent = formatDepth(depth);
+
+    tickCount++;
+    // Rotate status message every ~20 ticks
+    if (tickCount % 20 === 0) {
+      statusIdx = (statusIdx + 1) % STATUSES.length;
+      statusEl.textContent = STATUSES[statusIdx];
+    }
+    // Occasional instrument flicker
+    if (Math.random() < 0.04) flickerOnce();
+
+    setTimeout(tick, 900 + Math.random() * 600);
+  }
+
+  tick();
+</script>
 </body>
 </html>
