@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RAY — Captain · Navigator · Builder of Ghost Machines</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Pirata+One&family=IM+Fell+English:ital@0;1&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ── Custom Properties ────────────────────────────────── */
+    :root {
+      --bg:           #080608;
+      --bg-card:      #120e08;
+      --text:         #c8b090;
+      --gold:         #d4a017;
+      --gold-dim:     #8a6510;
+      --red:          #8b1a1a;
+      --bone:         #e8dcc8;
+      --wood-border:  #3a2810;
+      --wood-shadow:  rgba(212, 160, 23, 0.18);
+      --font-head:    'Pirata One', serif;
+      --font-body:    'IM Fell English', Georgia, serif;
+    }
+
+    /* ── Reset & Base ─────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: var(--font-body);
+      font-size: 1.05rem;
+      line-height: 1.75;
+      min-height: 100vh;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    /* ── Wood-grain texture overlay (pure CSS noise) ──────── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      background-image:
+        repeating-linear-gradient(
+          92deg,
+          transparent 0px,
+          transparent 3px,
+          rgba(255,200,80,0.012) 3px,
+          rgba(255,200,80,0.012) 4px
+        ),
+        repeating-linear-gradient(
+          178deg,
+          transparent 0px,
+          transparent 7px,
+          rgba(0,0,0,0.08) 7px,
+          rgba(0,0,0,0.08) 8px
+        ),
+        radial-gradient(ellipse at 20% 30%, rgba(60,30,5,0.25) 0%, transparent 60%),
+        radial-gradient(ellipse at 80% 70%, rgba(40,20,5,0.2) 0%, transparent 55%);
+    }
+
+    /* Subtle vignette */
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      background: radial-gradient(ellipse at center, transparent 45%, rgba(0,0,0,0.55) 100%);
+    }
+
+    /* ── Layout wrapper ───────────────────────────────────── */
+    .page {
+      position: relative;
+      z-index: 1;
+      max-width: 820px;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem 0;
+    }
+
+    /* ── Utility: section divider ─────────────────────────── */
+    .divider {
+      text-align: center;
+      color: var(--gold-dim);
+      font-size: 1rem;
+      letter-spacing: 0.12em;
+      margin: 2.8rem 0 2.2rem;
+      user-select: none;
+    }
+    .divider span { color: var(--gold); font-size: 1.1rem; }
+
+    /* ── Section label ────────────────────────────────────── */
+    .section-label {
+      font-family: var(--font-head);
+      font-size: 1.45rem;
+      color: var(--gold);
+      letter-spacing: 0.08em;
+      text-align: center;
+      margin-bottom: 1.6rem;
+      text-shadow: 0 0 18px rgba(212,160,23,0.35);
+    }
+
+    /* ─────────────────────────────────────────────────────── */
+    /* HEADER — WANTED POSTER                                  */
+    /* ─────────────────────────────────────────────────────── */
+    .wanted-poster {
+      border: 3px double var(--gold);
+      outline: 1px solid var(--gold-dim);
+      outline-offset: -8px;
+      padding: 2.2rem 2rem 2rem;
+      text-align: center;
+      background:
+        radial-gradient(ellipse at center top, rgba(212,160,23,0.07) 0%, transparent 65%),
+        var(--bg-card);
+      box-shadow:
+        0 0 0 6px var(--bg),
+        0 0 0 7px var(--wood-border),
+        0 0 40px rgba(212,160,23,0.12),
+        inset 0 0 40px rgba(0,0,0,0.5);
+      position: relative;
+      margin-bottom: 0;
+    }
+
+    .wanted-label {
+      font-family: var(--font-head);
+      font-size: 0.85rem;
+      letter-spacing: 0.55em;
+      color: var(--bone);
+      opacity: 0.7;
+      text-transform: uppercase;
+      margin-bottom: 0.4rem;
+    }
+
+    .wanted-skulls {
+      font-size: 2.2rem;
+      color: var(--gold);
+      letter-spacing: 0.3em;
+      display: block;
+      margin-bottom: 0.2rem;
+      text-shadow: 0 0 12px rgba(212,160,23,0.5);
+    }
+
+    .wanted-name {
+      font-family: var(--font-head);
+      font-size: clamp(5rem, 16vw, 9rem);
+      color: var(--bone);
+      line-height: 0.95;
+      letter-spacing: 0.06em;
+      text-shadow:
+        0 0 30px rgba(212,160,23,0.4),
+        0 2px 0 rgba(0,0,0,0.8),
+        3px 3px 0 rgba(0,0,0,0.4);
+      margin: 0.1rem 0 0.5rem;
+    }
+
+    .wanted-subtitle {
+      font-family: var(--font-body);
+      font-style: italic;
+      font-size: 1.05rem;
+      color: var(--text);
+      letter-spacing: 0.06em;
+      opacity: 0.9;
+      margin-bottom: 1.4rem;
+    }
+
+    .wanted-reward {
+      display: inline-block;
+      border: 1px solid var(--gold-dim);
+      padding: 0.3rem 1.4rem;
+      font-family: var(--font-head);
+      font-size: 0.82rem;
+      letter-spacing: 0.35em;
+      color: var(--red);
+      text-transform: uppercase;
+      background: rgba(139,26,26,0.08);
+    }
+
+    /* ─────────────────────────────────────────────────────── */
+    /* ASCII SHIP                                              */
+    /* ─────────────────────────────────────────────────────── */
+    .ship-wrap {
+      text-align: center;
+      margin: 2rem 0 0.5rem;
+    }
+
+    .ship-ascii {
+      display: inline-block;
+      font-family: 'Courier New', Courier, monospace;
+      font-size: clamp(0.52rem, 1.6vw, 0.82rem);
+      line-height: 1.35;
+      color: var(--gold-dim);
+      text-align: left;
+      white-space: pre;
+      text-shadow: 0 0 8px rgba(212,160,23,0.2);
+      opacity: 0.75;
+      letter-spacing: 0.02em;
+    }
+
+    /* ─────────────────────────────────────────────────────── */
+    /* AGED CARD                                               */
+    /* ─────────────────────────────────────────────────────── */
+    .aged-card {
+      background: var(--bg-card);
+      border: 1px solid var(--wood-border);
+      box-shadow:
+        0 0 0 1px rgba(0,0,0,0.6),
+        0 4px 24px rgba(0,0,0,0.5),
+        0 0 18px var(--wood-shadow),
+        inset 0 1px 0 rgba(212,160,23,0.06);
+      padding: 2rem 2.2rem;
+      position: relative;
+    }
+
+    /* corner ornaments */
+    .aged-card::before,
+    .aged-card::after {
+      position: absolute;
+      font-size: 0.9rem;
+      color: var(--gold-dim);
+      opacity: 0.5;
+      line-height: 1;
+    }
+    .aged-card::before { content: '✦'; top: 0.45rem; left: 0.6rem; }
+    .aged-card::after  { content: '✦'; bottom: 0.45rem; right: 0.6rem; }
+
+    /* ─────────────────────────────────────────────────────── */
+    /* SHIP'S LOG — BIO                                        */
+    /* ─────────────────────────────────────────────────────── */
+    .ships-log p {
+      margin-bottom: 1.1rem;
+      color: var(--text);
+    }
+    .ships-log p:last-child { margin-bottom: 0; }
+
+    .ships-log strong {
+      color: var(--bone);
+      font-style: normal;
+    }
+
+    .ships-log em {
+      color: var(--gold);
+      font-style: italic;
+    }
+
+    /* ─────────────────────────────────────────────────────── */
+    /* CHART THE COURSE — LINKS                                */
+    /* ─────────────────────────────────────────────────────── */
+    .course-links {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.85rem;
+    }
+
+    .course-links li {
+      display: flex;
+      align-items: baseline;
+      gap: 0.7rem;
+    }
+
+    .course-links .link-marker {
+      color: var(--red);
+      font-size: 0.9rem;
+      flex-shrink: 0;
+      line-height: 1;
+    }
+
+    .course-links a {
+      color: var(--gold);
+      text-decoration: none;
+      font-family: var(--font-body);
+      font-size: 1rem;
+      border-bottom: 1px solid transparent;
+      transition: color 0.2s, border-color 0.2s, text-shadow 0.2s;
+    }
+
+    .course-links a:hover {
+      color: var(--bone);
+      border-bottom-color: var(--gold-dim);
+      text-shadow: 0 0 10px rgba(212,160,23,0.4);
+    }
+
+    .course-links .link-desc {
+      color: var(--text);
+      opacity: 0.65;
+      font-style: italic;
+      font-size: 0.92rem;
+    }
+
+    .course-links .link-placeholder {
+      color: var(--text);
+      opacity: 0.35;
+      font-style: italic;
+      font-size: 0.92rem;
+    }
+
+    /* ─────────────────────────────────────────────────────── */
+    /* ARTICLES OF THE CODE — BLOCKQUOTE                       */
+    /* ─────────────────────────────────────────────────────── */
+    .articles-wrap {
+      text-align: center;
+      padding: 0.5rem 0;
+    }
+
+    .article-number {
+      font-family: var(--font-head);
+      font-size: 0.78rem;
+      letter-spacing: 0.45em;
+      color: var(--gold-dim);
+      text-transform: uppercase;
+      display: block;
+      margin-bottom: 1rem;
+    }
+
+    .articles-blockquote {
+      margin: 0;
+      padding: 0;
+      border: none;
+    }
+
+    .articles-blockquote .quote-mark {
+      display: block;
+      font-family: var(--font-head);
+      font-size: 4rem;
+      color: var(--gold);
+      line-height: 0.6;
+      opacity: 0.4;
+      margin-bottom: 0.6rem;
+      user-select: none;
+    }
+
+    .articles-blockquote p {
+      font-family: var(--font-body);
+      font-style: italic;
+      font-size: clamp(1.25rem, 3.5vw, 1.65rem);
+      color: var(--bone);
+      line-height: 1.5;
+      letter-spacing: 0.02em;
+      text-shadow: 0 0 20px rgba(232,220,200,0.12);
+      max-width: 580px;
+      margin: 0 auto;
+    }
+
+    .articles-blockquote cite {
+      display: block;
+      margin-top: 1.1rem;
+      font-family: var(--font-head);
+      font-size: 0.82rem;
+      letter-spacing: 0.25em;
+      color: var(--gold-dim);
+      font-style: normal;
+    }
+
+    .articles-rule {
+      border: none;
+      border-top: 1px solid var(--wood-border);
+      margin: 1.4rem auto;
+      width: 40%;
+      opacity: 0.6;
+    }
+
+    /* ─────────────────────────────────────────────────────── */
+    /* FOOTER                                                  */
+    /* ─────────────────────────────────────────────────────── */
+    footer {
+      margin-top: 3.5rem;
+      position: relative;
+      overflow: hidden;
+      padding-bottom: 0;
+    }
+
+    .footer-content {
+      position: relative;
+      z-index: 2;
+      text-align: center;
+      padding: 2.2rem 1.5rem 0.8rem;
+      background: linear-gradient(to bottom, transparent, rgba(0,5,10,0.6));
+    }
+
+    .footer-skull {
+      font-size: 1.6rem;
+      color: var(--gold-dim);
+      display: block;
+      margin-bottom: 0.6rem;
+      opacity: 0.6;
+    }
+
+    .footer-motto {
+      font-family: var(--font-body);
+      font-style: italic;
+      font-size: 0.98rem;
+      color: var(--text);
+      opacity: 0.7;
+      letter-spacing: 0.04em;
+      margin-bottom: 1.6rem;
+    }
+
+    .footer-motto strong {
+      color: var(--bone);
+      font-style: normal;
+      opacity: 0.9;
+    }
+
+    /* ── CSS Ocean waves ──────────────────────────────────── */
+    .ocean {
+      position: relative;
+      height: 80px;
+      width: 100%;
+      overflow: hidden;
+    }
+
+    .wave {
+      position: absolute;
+      bottom: 0;
+      left: -100%;
+      width: 300%;
+      height: 60px;
+      border-radius: 50%;
+      animation: wave-roll linear infinite;
+    }
+
+    .wave-1 {
+      background: radial-gradient(ellipse at center bottom,
+        rgba(0, 50, 60, 0.22) 0%,
+        rgba(0, 30, 40, 0.10) 60%,
+        transparent 100%);
+      animation-duration: 8s;
+      transform: translateX(0);
+      height: 55px;
+      bottom: 5px;
+    }
+
+    .wave-2 {
+      background: radial-gradient(ellipse at center bottom,
+        rgba(0, 70, 80, 0.16) 0%,
+        rgba(0, 40, 50, 0.07) 60%,
+        transparent 100%);
+      animation-duration: 11s;
+      animation-direction: reverse;
+      height: 45px;
+      bottom: 12px;
+    }
+
+    .wave-3 {
+      background: radial-gradient(ellipse at center bottom,
+        rgba(0, 40, 50, 0.13) 0%,
+        transparent 65%);
+      animation-duration: 14s;
+      height: 35px;
+      bottom: 20px;
+    }
+
+    @keyframes wave-roll {
+      0%   { transform: translateX(0); }
+      100% { transform: translateX(33.333%); }
+    }
+
+    .footer-copy {
+      position: relative;
+      z-index: 2;
+      text-align: center;
+      padding: 0.5rem 1rem 1.5rem;
+      font-family: var(--font-head);
+      font-size: 0.72rem;
+      letter-spacing: 0.25em;
+      color: var(--gold-dim);
+      opacity: 0.45;
+      text-transform: uppercase;
+    }
+
+    /* ─────────────────────────────────────────────────────── */
+    /* Responsive tweaks                                       */
+    /* ─────────────────────────────────────────────────────── */
+    @media (max-width: 540px) {
+      .wanted-poster { padding: 1.6rem 1.1rem 1.4rem; }
+      .aged-card { padding: 1.4rem 1.2rem; }
+      .ship-ascii { font-size: 0.44rem; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="page">
+
+  <!-- ══════════════════════════════════════════════ -->
+  <!-- HEADER: WANTED POSTER                         -->
+  <!-- ══════════════════════════════════════════════ -->
+  <header>
+    <div class="wanted-poster">
+      <p class="wanted-label">☠ &nbsp; Wanted &nbsp; ☠</p>
+      <span class="wanted-skulls">☠ &nbsp;&nbsp; ☠</span>
+      <h1 class="wanted-name">RAY</h1>
+      <p class="wanted-subtitle">Captain &middot; Navigator &middot; Builder of Ghost Machines</p>
+      <span class="wanted-reward">⚓ &nbsp; Dead or Alive &nbsp; ⚓</span>
+    </div>
+  </header>
+
+  <!-- ASCII Ship -->
+  <div class="ship-wrap">
+    <pre class="ship-ascii">                    |    |    |
+                   )_)  )_)  )_)
+                  )___))___))___)\\
+                 )____)____)_____)\\\\
+               _____|____|____|____\\\\\__
+      ---------\                   /---------
+        ^^^^^ ^^^^^^^^^^^^^^^^^^^^^
+          ^^^^      ^^^^     ^^^    ^^
+               ^^^^      ^^^</pre>
+  </div>
+
+  <!-- ══════════════════════════════════════════════ -->
+  <!-- SHIP'S LOG                                    -->
+  <!-- ══════════════════════════════════════════════ -->
+  <div class="divider">──── <span>☠</span> ────</div>
+
+  <section aria-labelledby="shipslog-label">
+    <h2 class="section-label" id="shipslog-label">── ⚓ Ship's Log ⚓ ──</h2>
+
+    <div class="aged-card ships-log">
+      <p>
+        <strong>Twenty years and more</strong> have I sailed the waters of software
+        and systems, commanding crews and charting courses through the depths of
+        defense technology. From the first crude maps to the complex architectures
+        of today, the work has never been merely work — it has been an expedition,
+        and I its captain.
+      </p>
+      <p>
+        My present commission is among the most singular in the fleet: I oversee
+        the <em>design, development, testing, and deployment of autonomous undersea
+        vehicles</em> — machines that dive alone into the abyss, guided by nothing
+        but the intelligence we build into them. Ghost machines. They hunt the deep
+        without lantern or crew, and it is our craft that gives them purpose.
+      </p>
+      <p>
+        When not at the helm, I am found where the horizon is wide — outdoors,
+        always moving, always reading. A sailor who studies the charts before
+        setting sail; a builder who learns before building. The sea rewards
+        preparation and punishes arrogance. <strong>I have not forgotten this.</strong>
+      </p>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════ -->
+  <!-- CHART THE COURSE                              -->
+  <!-- ══════════════════════════════════════════════ -->
+  <div class="divider">──── <span>⚓</span> ────</div>
+
+  <section aria-labelledby="course-label">
+    <h2 class="section-label" id="course-label">── ☠ Chart the Course ☠ ──</h2>
+
+    <div class="aged-card">
+      <ul class="course-links">
+        <li>
+          <span class="link-marker">⚓</span>
+          <div>
+            <a href="https://github.com/rayzinhell" target="_blank" rel="noopener noreferrer">github.com/rayzinhell</a>
+            <span class="link-desc"> — the manifest of projects &amp; plunder</span>
+          </div>
+        </li>
+        <!-- Add further ports of call here -->
+        <li>
+          <span class="link-marker">⚓</span>
+          <span class="link-placeholder"><em>More harbors charted in time — check back, sailor.</em></span>
+        </li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════ -->
+  <!-- ARTICLES OF THE CODE                          -->
+  <!-- ══════════════════════════════════════════════ -->
+  <div class="divider">──── <span>☠</span> ────</div>
+
+  <section aria-labelledby="articles-label">
+    <h2 class="section-label" id="articles-label">── ⚓ Articles of the Code ⚓ ──</h2>
+
+    <div class="aged-card articles-wrap">
+      <span class="article-number">Article the First &amp; Last</span>
+      <blockquote class="articles-blockquote">
+        <span class="quote-mark">&ldquo;</span>
+        <p>I've never regretted being kind to someone.</p>
+        <hr class="articles-rule" />
+        <cite>— Carved into the hull, bearing true</cite>
+      </blockquote>
+    </div>
+  </section>
+
+</div><!-- /.page -->
+
+<!-- ══════════════════════════════════════════════ -->
+<!-- FOOTER                                        -->
+<!-- ══════════════════════════════════════════════ -->
+<footer>
+  <div class="footer-content">
+    <span class="footer-skull">☠</span>
+    <p class="footer-motto">
+      Dead men tell no tales. <strong>Build good software.</strong>
+    </p>
+  </div>
+
+  <!-- CSS Ocean -->
+  <div class="ocean" aria-hidden="true">
+    <div class="wave wave-1"></div>
+    <div class="wave wave-2"></div>
+    <div class="wave wave-3"></div>
+  </div>
+
+  <p class="footer-copy">☠ &nbsp; RAY &nbsp; ☠ &nbsp; All rights reserved &nbsp; ☠</p>
+</footer>
+
+</body>
+</html>
