@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>RAY — Architect of the Ghost Fleet</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>☠</text></svg>">
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Pirata+One&family=IM+Fell+English:ital@0;1&display=swap" rel="stylesheet" />
@@ -483,6 +484,33 @@
       .aged-card { padding: 1.4rem 1.2rem; }
       .ship-ascii { font-size: 0.44rem; }
     }
+
+    /* ── SEA QUOTE ────────────────────────────────────── */
+    .sea-quote-wrap {
+      margin: 1.8rem 0 0;
+      text-align: center;
+      padding: 0 1rem;
+    }
+    .sea-quote-text {
+      display: block;
+      font-family: var(--font-body);
+      font-style: italic;
+      font-size: 0.9rem;
+      line-height: 1.7;
+      color: var(--text);
+      opacity: 0.55;
+      max-width: 480px;
+      margin: 0 auto;
+    }
+    .sea-quote-attr {
+      display: block;
+      margin-top: 0.5rem;
+      font-family: var(--font-head);
+      font-size: 0.65rem;
+      letter-spacing: 0.22em;
+      color: var(--gold-dim);
+      opacity: 0.7;
+    }
   </style>
 </head>
 <body>
@@ -513,6 +541,12 @@
         ^^^^^ ^^^^^^^^^^^^^^^^^^^^^
           ^^^^      ^^^^     ^^^    ^^
                ^^^^      ^^^</pre>
+  </div>
+
+  <!-- Sea quote -->
+  <div class="sea-quote-wrap">
+    <span class="sea-quote-text" id="sea-quote-text"></span>
+    <span class="sea-quote-attr" id="sea-quote-attr"></span>
   </div>
 
   <!-- ══════════════════════════════════════════════ -->
@@ -623,5 +657,25 @@
   <p class="footer-copy">☠ &nbsp; RAY &nbsp; ☠ &nbsp; All rights reserved &nbsp; ☠</p>
 </footer>
 
+<script>
+  const JOKES = [
+    { text: "Why don't oysters share? Because they're shellfish.", attr: "☠ overheard at the helm" },
+    { text: "What did the ocean say to the pirate? Nothing, it just waved.", attr: "☠ classic, and worth it" },
+    { text: "Why did the pirate fail school? Because he was always at C.", attr: "☠ logged and unregretted" },
+    { text: "What's a pirate's favorite letter? You'd think it's R, but his first love is the C.", attr: "☠ a classic misdirection" },
+    { text: "How much does a pirate pay for corn? A buccaneer.", attr: "☠ the captain's own joke" },
+    { text: "What did the first mate find in the treasure chest? A sunken chest — he needed a better bra.", attr: "☠ found in the ship's log, regrettably" },
+    { text: "Why can't pirates finish the alphabet? They always get lost at C.", attr: "☠ navigational error confirmed" },
+    { text: "What do you call a pirate who skips school? Captain Hooky.", attr: "☠ disciplinary record sealed" },
+    { text: "Why do pirates like sailing? Because it arrrr-elaxes them.", attr: "☠ medical opinion, not professional advice" },
+    { text: "What do you call a fish without eyes? A fsh.", attr: "☠ the crew did not laugh either" },
+    { text: "Why did the sailor bring a pencil to sea? In case he had to draw anchor.", attr: "☠ from the log, entry unclear" },
+    { text: "I used to hate the ocean, but it's growing on me.", attr: "☠ see ship's log re: barnacles" },
+  ];
+
+  const j = JOKES[Math.floor(Math.random() * JOKES.length)];
+  document.getElementById('sea-quote-text').textContent = j.text;
+  document.getElementById('sea-quote-attr').textContent = j.attr;
+</script>
 </body>
 </html>
