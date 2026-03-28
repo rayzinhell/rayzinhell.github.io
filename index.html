@@ -485,45 +485,6 @@
       .ship-ascii { font-size: 0.44rem; }
     }
 
-    /* ── DEPTH GAUGE ─────────────────────────────────── */
-    .depth-gauge {
-      position: fixed;
-      bottom: 6rem;
-      right: 1.2rem;
-      z-index: 10;
-      text-align: right;
-      font-family: 'Courier New', monospace;
-      line-height: 1.6;
-      opacity: 0.55;
-      transition: opacity 0.3s;
-      user-select: none;
-      pointer-events: none;
-    }
-    .depth-gauge:hover { opacity: 1; pointer-events: auto; }
-    .depth-gauge .dg-label {
-      font-size: 0.52rem;
-      letter-spacing: 0.35em;
-      color: var(--gold-dim);
-      text-transform: uppercase;
-    }
-    .depth-gauge .dg-reading {
-      font-size: 1.1rem;
-      letter-spacing: 0.08em;
-      color: var(--gold);
-      text-shadow: 0 0 10px rgba(212,160,23,0.5);
-    }
-    .depth-gauge .dg-unit {
-      font-size: 0.6rem;
-      color: var(--gold-dim);
-      margin-left: 0.1em;
-    }
-    .depth-gauge .dg-status {
-      font-size: 0.5rem;
-      letter-spacing: 0.2em;
-      color: var(--text);
-      opacity: 0.45;
-    }
-
     /* ── SEA QUOTE ────────────────────────────────────── */
     .sea-quote-wrap {
       margin: 1.8rem 0 0;
@@ -696,71 +657,25 @@
   <p class="footer-copy">☠ &nbsp; RAY &nbsp; ☠ &nbsp; All rights reserved &nbsp; ☠</p>
 </footer>
 
-<!-- Depth Gauge -->
-<div class="depth-gauge" aria-hidden="true">
-  <div class="dg-label">depth</div>
-  <div class="dg-reading"><span id="depth-val">0000</span><span class="dg-unit">fm</span></div>
-  <div class="dg-status" id="depth-status">descending</div>
-</div>
-
 <script>
-  // ── Sea quotes ──────────────────────────────────────────────
-  const QUOTES = [
-    { text: "The sea, once it casts its spell, holds one in its net of wonder forever.", attr: "Jacques Cousteau" },
-    { text: "A ship in harbor is safe, but that is not what ships are for.", attr: "John A. Shedd" },
-    { text: "The cure for anything is salt water — sweat, tears, or the sea.", attr: "Isak Dinesen" },
-    { text: "Not all those who wander are lost.", attr: "J.R.R. Tolkien" },
-    { text: "Twenty years from now you will be more disappointed by the things you didn't do than by the ones you did.", attr: "Mark Twain" },
-    { text: "We are tied to the ocean. And when we go back to the sea, we are going back from whence we came.", attr: "John F. Kennedy" },
-    { text: "The pessimist complains about the wind; the optimist expects it to change; the realist adjusts the sails.", attr: "William Arthur Ward" },
-    { text: "It is not the ship so much as the skillful sailing that assures the prosperous voyage.", attr: "George William Curtis" },
-    { text: "Difficulties are just things to overcome, after all.", attr: "Ernest Shackleton" },
-    { text: "The heart of man is very much like the sea; it has its storms, its tides, and its depths.", attr: "Vincent van Gogh" },
-    { text: "Even the darkest night will end and the sun will rise.", attr: "Victor Hugo" },
-    { text: "To reach a port we must set sail — sail, not tie at anchor; sail, not drift.", attr: "Franklin D. Roosevelt" },
+  const JOKES = [
+    { text: "Why don't oysters share? Because they're shellfish.", attr: "☠ overheard at the helm" },
+    { text: "What did the ocean say to the pirate? Nothing, it just waved.", attr: "☠ classic, and worth it" },
+    { text: "Why did the pirate fail school? Because he was always at C.", attr: "☠ logged and unregretted" },
+    { text: "What's a pirate's favorite letter? You'd think it's R, but his first love is the C.", attr: "☠ a classic misdirection" },
+    { text: "How much does a pirate pay for corn? A buccaneer.", attr: "☠ the captain's own joke" },
+    { text: "What did the first mate find in the treasure chest? A sunken chest — he needed a better bra.", attr: "☠ found in the ship's log, regrettably" },
+    { text: "Why can't pirates finish the alphabet? They always get lost at C.", attr: "☠ navigational error confirmed" },
+    { text: "What do you call a pirate who skips school? Captain Hooky.", attr: "☠ disciplinary record sealed" },
+    { text: "Why do pirates like sailing? Because it arrrr-elaxes them.", attr: "☠ medical opinion, not professional advice" },
+    { text: "What do you call a fish without eyes? A fsh.", attr: "☠ the crew did not laugh either" },
+    { text: "Why did the sailor bring a pencil to sea? In case he had to draw anchor.", attr: "☠ from the log, entry unclear" },
+    { text: "I used to hate the ocean, but it's growing on me.", attr: "☠ see ship's log re: barnacles" },
   ];
 
-  const q = QUOTES[Math.floor(Math.random() * QUOTES.length)];
-  document.getElementById('sea-quote-text').textContent = '\u201c' + q.text + '\u201d';
-  document.getElementById('sea-quote-attr').textContent = '\u2014 ' + q.attr;
-
-  // ── Depth gauge ─────────────────────────────────────────────
-  // Start at a plausible operating depth (200–500 fathoms)
-  let depth = 200 + Math.random() * 300;
-  const depthEl   = document.getElementById('depth-val');
-  const statusEl  = document.getElementById('depth-status');
-  const STATUSES  = ['descending', 'descending', 'descending', 'holding depth', 'adjusting trim'];
-  let statusIdx   = 0;
-  let tickCount   = 0;
-
-  function formatDepth(d) {
-    return String(Math.round(d)).padStart(4, '0');
-  }
-
-  function flickerOnce() {
-    depthEl.style.opacity = '0.2';
-    setTimeout(() => { depthEl.style.opacity = '1'; }, 90);
-  }
-
-  function tick() {
-    // Slow descent with tiny random pressure fluctuations
-    const drift = 0.15 + (Math.random() - 0.3) * 0.4;
-    depth = Math.max(10, depth + drift);
-    depthEl.textContent = formatDepth(depth);
-
-    tickCount++;
-    // Rotate status message every ~20 ticks
-    if (tickCount % 20 === 0) {
-      statusIdx = (statusIdx + 1) % STATUSES.length;
-      statusEl.textContent = STATUSES[statusIdx];
-    }
-    // Occasional instrument flicker
-    if (Math.random() < 0.04) flickerOnce();
-
-    setTimeout(tick, 900 + Math.random() * 600);
-  }
-
-  tick();
+  const j = JOKES[Math.floor(Math.random() * JOKES.length)];
+  document.getElementById('sea-quote-text').textContent = j.text;
+  document.getElementById('sea-quote-attr').textContent = j.attr;
 </script>
 </body>
 </html>
